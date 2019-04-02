@@ -25,6 +25,10 @@ int main(void) {
         // Multiply by 5 due to the voltage sensor dividing the voltage by 5 so it is readable by the Arduino Analog pin.
         current_voltage = (battery_voltage_pin.read() * 5) + voltage_meter_deviation;
 
+        if (current_voltage < 0){
+            current_voltage = 0;
+        }
+
         // If battery voltage is below empty, battery percentage is 0
         if (current_voltage <= battery_empty_voltage){
             current_percentage = 0;
