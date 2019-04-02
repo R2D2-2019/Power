@@ -15,25 +15,25 @@ int main(void) {
     hwlib::wait_ms(1000);
     namespace target = hwlib::target;
 
-    auto batteryVoltagePin = hwlib::target::pin_adc(target::ad_pins::a1);
-    int onePercent = (battery_max_voltage - battery_empty_voltage) / 100;
+    auto battery_voltage_pin = hwlib::target::pin_adc(target::ad_pins::a1);
+    int one_percent_voltage = (battery_max_voltage - battery_empty_voltage) / 100;
 
-    int currentVoltage = battery_max_voltage;
-    int currentPercentage = 100;
+    int current_voltage = battery_max_voltage;
+    int current_percentage = 100;
 
     for (;;){
         // Multiply by 5 due to the voltage sensor dividing the voltage by 5 so it is readable by the Arduino Analog pin.
-        currentVoltage = (batteryVoltagePin.read() * 5) + voltage_meter_deviation;
+        current_voltage = (battery_voltage_pin.read() * 5) + voltage_meter_deviation;
 
         // If battery voltage is below empty, battery percentage is 0
-        if (currentVoltage <= battery_empty_voltage){
-            currentPercentage = 0;
+        if (current_voltage <= battery_empty_voltage){
+            current_percentage = 0;
         }else{
-            currentPercentage = (currentVoltage - battery_empty_voltage) / onePercent;
+            current_percentage = (current_voltage - battery_empty_voltage) / one_percent_voltage;
         }
 
-        hwlib::cout << "Battery V:" << currentVoltage << hwlib::endl;
-        hwlib::cout << "Battery percentage:" << currentPercentage << hwlib::endl;
+        hwlib::cout << "Battery V:" << current_voltage << hwlib::endl;
+        hwlib::cout << "Battery percentage:" << current_percentage << hwlib::endl;
 
         hwlib::wait_ms(250);
     }
