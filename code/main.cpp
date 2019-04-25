@@ -13,9 +13,8 @@ int main(void) {
     // kill the watchdog
     WDT->WDT_MR = WDT_MR_WDDIS;
     hwlib::wait_ms(1000);
-    namespace target = hwlib::target;
 
-    auto battery_voltage_pin = hwlib::target::pin_adc(target::ad_pins::a1);
+    auto battery_voltage_pin = hwlib::target::pin_adc(hwlib::target::ad_pins::a1);
     int one_percent_voltage = (battery_max_voltage - battery_empty_voltage) / 100;
 
     int current_voltage = battery_max_voltage;
@@ -23,10 +22,12 @@ int main(void) {
 
     for (;;){
         // Multiply by 5 due to the voltage sensor dividing the voltage by 5 so it is readable by the Arduino Analog pin.
-        current_voltage = (battery_voltage_pin.read() * 5) + voltage_meter_deviation;
+        // Officially this should be multiplied by 5, however this gives an inaccurate result. (See https://docs.google.com/document/d/1BwI1GRxFp-6vBoxl7DooKZmc6JwJ7vQcBKDf2PtpRDM/edit?usp=sharing)
 
-        if (current_voltage < 0){
-            current_voltage = 0;
+        current_voltage = battery_voltage_pin.read() * 4.05;
+
+        if(current_voltage > battery_max_voltage){
+            current_voltage = battery_max_voltage;
         }
 
         // If battery voltage is below empty, battery percentage is 0
