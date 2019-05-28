@@ -1,5 +1,6 @@
 #include <hwlib.hpp>
 
+#include <comm.hpp>
 #include <module.hpp>
 
 int main(void) {
@@ -7,6 +8,9 @@ int main(void) {
     WDT->WDT_MR = WDT_MR_WDDIS;
 
     hwlib::wait_ms(1000);
+
+    // Comm
+    r2d2::comm_c comm;
 
     // Battery definitions
     constexpr uint_fast32_t min_voltage = 10800;
@@ -18,7 +22,7 @@ int main(void) {
 
     // Instances
     r2d2::power::battery_level_c level_meter(adc_pin, min_voltage, max_voltage);
-    r2d2::power::module_c module(level_meter, warning_percentage);
+    r2d2::power::module_c module(comm, level_meter, warning_percentage);
     
     for (;;) {
         module.process();

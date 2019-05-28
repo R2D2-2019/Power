@@ -19,13 +19,13 @@ namespace r2d2::power {
          * The battery level in percentage that
          * triggers the warning on the bus.
          */ 
-        uint_fast8_t warning_percentage;
+        uint8_t warning_percentage;
 
         /**
          * The percentage level at which the 
          * last warning was given.
          */ 
-        uint_fast8_t last_warning_percentage;
+        uint8_t last_warning_percentage;
 
     public:
         /**
@@ -51,8 +51,8 @@ namespace r2d2::power {
          * Let the module process data.
          */
         void process() override {
-            frame_battery_level frame;
-            frame.percentage = get_battery_percentage();
+            frame_battery_level_s frame;
+            frame.percentage = level_meter.get_battery_percentage();
             frame.voltage = level_meter.get_battery_voltage();
 
             while (comm.has_data()) {
