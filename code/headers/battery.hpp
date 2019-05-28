@@ -14,7 +14,7 @@ namespace r2d2::power {
          * Currently, this is a target::pin_adc because 
          * a hwlib::pin_adc interface doesn't exist (yet).
          */ 
-        hwlib::target::pin_adc &source;
+        hwlib::adc &source;
 
         // The lowest voltage that the battery can reach.
         const uint_fast32_t min_voltage;
@@ -39,7 +39,7 @@ namespace r2d2::power {
          * @param max_voltage The highest voltage the battery can reach before it is "full".
          */ 
         battery_level_c(
-            hwlib::target::pin_adc &source,
+            hwlib::adc &source,
             const uint_fast32_t min_voltage,
             const uint_fast32_t max_voltage
         ) : source(source),
