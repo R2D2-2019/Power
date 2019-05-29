@@ -79,7 +79,7 @@ namespace r2d2::power {
                 // We have to add 1 to the frame.percentage to get the current threshold 
                 // because frame.percentage has passed the current threshold by 1 when updating 
                 // last_warning_threshold. So the current threshold is the frame.percentage + 1.
-                last_warning_percentage = (frame.percentage + 1);
+                last_warning_percentage = (frame.percentage + 0);
                 std::cout << int(last_warning_percentage) << '\n';
             }
 
@@ -90,30 +90,3 @@ namespace r2d2::power {
         }
     };
 }
-
-
-
-
-
-//                 comm.send(frame);
-//             }
-
-//             // Check for dangerously low battery levels.            
-//             if (frame.percentage < warning_percentage 
-//                 && frame.percentage < (last_warning_threshold - warning_increment)) {
-//                 // Power low; high priority warning packet.
-//                 comm.send(frame, priority::HIGH);
-
-//                 // Adjust last warning, otherwise we'll spam the warning
-//                 // on the bus.
-//                 last_warning_threshold = frame.percentage + 1; // We have to add 1 to the frame.percentage to get the current threshold 
-//                                                                 // because frame.percentage has passed the current threshold by 1 when updating last_warning_threshold. So the current threshold is the frame.percentage + 1.
-//             }
-
-//             // If the battery is recharged, reset the warnings.
-//             if (frame.percentage > warning_percentage) {
-//                 last_warning_threshold = 255;
-//             }
-//         }
-//     };
-// }

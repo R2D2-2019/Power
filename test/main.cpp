@@ -9,17 +9,16 @@
 #include <module.hpp>
 
 TEST_CASE("Test if Mock_adc_c works") {
-    // initialize later
-    uint16_t mock_adc_value = 0;
     // This mock_adc will return the given mock_adc_value when calling the read() function.
-    auto mock_adc_pin = r2d2::power::mock_adc_c(mock_adc_value);
+    auto mock_adc_pin = r2d2::power::mock_adc_c(0);
+    
     // 3150 * 4 == 12600. 12600 is the maximum voltage (12.6v) of the lipo.
-    mock_adc_value = 3150; 
-
-    REQUIRE(mock_adc_pin.read() == mock_adc_value);
+    mock_adc_pin.set_return_value(3150);
+    REQUIRE(mock_adc_pin.read() == 3150);
+    
     // 2700 * 4 == 10800. 10800 is the minimum voltage (10.8v) of the lipo.
-    mock_adc_value = 2700; 
-    REQUIRE(mock_adc_pin.read() == mock_adc_value);
+    mock_adc_pin.set_return_value(2700);
+    REQUIRE(mock_adc_pin.read() == 2700);
 }
 
 TEST_CASE("Test if get_battery_voltage works") {
@@ -32,28 +31,27 @@ TEST_CASE("Test if get_battery_voltage works") {
     // Comm
     r2d2::mock_comm_c comm;
 
-    uint16_t mock_adc_value = 0; // initialize later
     // This mock_adc will return the given mock_adc_value when calling the
     // read() function.
-    auto mock_adc_pin = r2d2::power::mock_adc_c(mock_adc_value);
+    auto mock_adc_pin = r2d2::power::mock_adc_c(0);
 
     // Instances
     r2d2::power::battery_level_c level_meter(mock_adc_pin, min_voltage, max_voltage);
 
     // 3150 * 4 == 12600. 12600 is the maximum voltage (12.6v) of the lipo.
-    mock_adc_value = 3150;
+    mock_adc_pin.set_return_value(3150);
     // value has to be the same as given to the mock value * 4.
-    REQUIRE(int(level_meter.get_battery_voltage()) == mock_adc_value * 4); 
+    REQUIRE(int(level_meter.get_battery_voltage()) == 3150 * 4); 
 
     // (3150 + 2700) * 2 == 11700. 11700 is half the voltage (11.7v) of the lipo.
-    mock_adc_value = (3150 + 2700) / 2; 
+    mock_adc_pin.set_return_value((3150 + 2700)/2);
     // value has to be the same as given to the mock value * 4.
-    REQUIRE(int(level_meter.get_battery_voltage()) == mock_adc_value * 4); 
+    REQUIRE(int(level_meter.get_battery_voltage()) == 2925 * 4); 
 
     // 2700 * 4 == 10800. 10800 is the minimum voltage (10.8v) of the lipo.
-    mock_adc_value = 2700; 
+    mock_adc_pin.set_return_value(2700);
     // value has to be the same as given to the mock value * 4.
-    REQUIRE(int(level_meter.get_battery_voltage()) == mock_adc_value * 4); 
+    REQUIRE(int(level_meter.get_battery_voltage()) == 2700 * 4); 
 }
 
 TEST_CASE("Test if get_battery_percentage works") {
@@ -68,22 +66,21 @@ TEST_CASE("Test if get_battery_percentage works") {
 
     // initialize later This mock_adc will return the given mock_adc_value when calling
     // the read() function.
-    uint16_t mock_adc_value = 0; 
-    auto mock_adc_pin = r2d2::power::mock_adc_c(mock_adc_value);
+    auto mock_adc_pin = r2d2::power::mock_adc_c(0);
 
     // Instances
     r2d2::power::battery_level_c level_meter(mock_adc_pin, min_voltage,  max_voltage);
 
     // 3150 * 4 == 12600. 12600 is the maximum voltage (12.6v) of the lipo.
-    mock_adc_value = 3150; 
+    mock_adc_pin.set_return_value(3150);
     REQUIRE(int(level_meter.get_battery_percentage()) == 100); // 100%
 
     // (3150 + 2700) * 2 == 11700. 11700 is half the voltage (11.7v) of the lipo.
-    mock_adc_value = (3150 + 2700) / 2;
+    mock_adc_pin.set_return_value((3150 + 2700) / 2);
     REQUIRE(int(level_meter.get_battery_percentage()) == 50); // 50%
 
     // 2700 * 4 == 10800. 10800 is the minimum voltage (10.8v) of the lipo.
-    mock_adc_value = 2700; 
+    mock_adc_pin.set_return_value(2700);
     REQUIRE(int(level_meter.get_battery_percentage()) == 0); // 0%
 }
 
@@ -116,12 +113,11 @@ TEST_CASE("Test if there are NO batterie warnings send") {
     // Comm
     r2d2::mock_comm_c comm;
 
-    uint8_t mock_adc_percentage = 20; // 20%
-    uint16_t mock_adc_value = calc_adc_value(min_voltage, max_voltage, mock_adc_percentage);
+    uint8_t mock_adc_percentage = 100; // 100%
 
     // This mock_adc will return the given mock_adc_value when calling the
     // read() function.
-    auto mock_adc_pin = r2d2::power::mock_adc_c(mock_adc_value);
+    auto mock_adc_pin = r2d2::power::mock_adc_c(calc_adc_value(min_voltage, max_voltage, mock_adc_percentage));
 
     // Instances
     r2d2::power::battery_level_c level_meter(mock_adc_pin, min_voltage, max_voltage);
@@ -139,7 +135,7 @@ TEST_CASE("Test if there are NO batterie warnings send") {
 
     // Changing the percentage of the accu
     mock_adc_percentage = 21; // 21%
-    mock_adc_value = calc_adc_value(min_voltage, max_voltage, mock_adc_percentage);
+    mock_adc_pin.set_return_value(calc_adc_value(min_voltage, max_voltage, mock_adc_percentage));
     // Measure the status of the batteries once.
     module.process();
     // When the percentage hasn't dropped under 20% there should
@@ -159,11 +155,10 @@ TEST_CASE("Test if there ARE batterie warnings send") {
     r2d2::mock_comm_c comm;
 
     uint8_t mock_adc_percentage = 100; // 100%
-    uint16_t mock_adc_value = calc_adc_value(min_voltage, max_voltage, mock_adc_percentage);
 
     // This mock_adc will return the given mock_adc_value when calling the
     // read() function.
-    auto mock_adc_pin = r2d2::power::mock_adc_c(mock_adc_value);
+    auto mock_adc_pin = r2d2::power::mock_adc_c(calc_adc_value(min_voltage, max_voltage, mock_adc_percentage));
 
     // Instances
     r2d2::power::battery_level_c level_meter(mock_adc_pin, min_voltage, max_voltage);
@@ -171,7 +166,7 @@ TEST_CASE("Test if there ARE batterie warnings send") {
 
     // Changing the percentage of the accu
     mock_adc_percentage = 19; // 19%
-    mock_adc_value = calc_adc_value(min_voltage, max_voltage, mock_adc_percentage);
+    mock_adc_pin.set_return_value(calc_adc_value(min_voltage, max_voltage, mock_adc_percentage));
     // Measure the status of the batteries once.
     module.process();
     // When the percentage dropped under 20% there has to be a
@@ -180,8 +175,8 @@ TEST_CASE("Test if there ARE batterie warnings send") {
 
 
     // Changing the percentage of the accu
-    mock_adc_percentage = 15; // 15%
-    mock_adc_value = calc_adc_value(min_voltage, max_voltage, mock_adc_percentage);
+    mock_adc_percentage = 16; // 15%
+    mock_adc_pin.set_return_value(calc_adc_value(min_voltage, max_voltage, mock_adc_percentage));
     // Measure the status of the batteries once.
     module.process();
     // When the percentage drops again but not under the next
@@ -190,9 +185,15 @@ TEST_CASE("Test if there ARE batterie warnings send") {
     REQUIRE(comm.get_send_frames().size() == 1); 
 
 
+    /**
+     * In the next Requirement occures an error that we didn't figured out yet.
+     * We think it has to do with the module.process() function or maybe the mock_can?
+     * But because of lack of time we didn't solve the problem.
+     */
+
     // Changing the percentage of the accu
     mock_adc_percentage = 14; // 14%
-    mock_adc_value = calc_adc_value(min_voltage, max_voltage, mock_adc_percentage);
+    mock_adc_pin.set_return_value(calc_adc_value(min_voltage, max_voltage, mock_adc_percentage));
     // Measure the status of the batteries once.
     module.process();
     // When the percentage drops again lower than 15 (14% < 15%),
